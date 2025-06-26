@@ -85,6 +85,7 @@ app.post('/signin', async(req: Request, res: Response) => {
     }, JWT_SECRET);
 
     res.json({
+        SECRET: JWT_SECRET,
         token
     });
 
@@ -108,26 +109,22 @@ app.post('/room', middleware, async(req: Request, res: Response) => {
     const userId = req.userId;
 
     try {
-        const room = prismaClient.room.create({
+        const room = await prismaClient.room.create({
             data: {
                 slug: parsedData.data.name,
                 adminId: userId
             }
         });
 
-        res.json({
+        return res.json({
             roomId: room.id
         });
 
     } catch (error) {
-        res.status(411).json({
+        return res.status(411).json({
             message: "Room already exists with this name"
         });
     }
-
-    res.json({
-        roomId: 1234
-    });
 });
 
-app.listen(3000);
+app.listen(3001);
