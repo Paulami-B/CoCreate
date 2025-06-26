@@ -1,1 +1,2 @@
-export const JWT_SECRET = process.env.JWT_SECRET || "MyJwTsEcReT";
+const JWT_SECRET = process.env.JWT_SECRET || "MyJwTsEcReT";
+module.exports = JWT_SECRET;
