@@ -85,7 +85,6 @@ app.post('/signin', async(req: Request, res: Response) => {
     }, JWT_SECRET);
 
     res.json({
-        SECRET: JWT_SECRET,
         token
     });
 
@@ -126,5 +125,31 @@ app.post('/room', middleware, async(req: Request, res: Response) => {
         });
     }
 });
+
+//@ts-ignore
+app.get("/chats/:roomId", middleware, async(req: Request, res: Response) => {
+    try {
+        const roomId = Number(req.params.roomId);
+        console.log(req.params.roomId);
+        const messages = await prismaClient.chat.findMany({
+            where: {
+                roomId: roomId
+            },
+            orderBy: {
+                id: "desc"
+            },
+            take: 1000
+        });
+
+        res.json({
+            messages
+        });
+    } catch(e) {
+        console.log(e);
+        res.json({
+            messages: []
+        });
+    }
+})
 
 app.listen(3001);
