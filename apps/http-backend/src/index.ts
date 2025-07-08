@@ -2,13 +2,14 @@ import express, { Request, Response } from "express";
 import jwt from "jsonwebtoken";
 import { middleware } from "./middleware";
 import bcrypt from "bcryptjs";
-
+import cors from "cors";
 
 const prismaClient = require("@repo/db/client");
 const JWT_SECRET = require("@repo/backend-common/config");
-const { CreateRoomSchema, CreateUserSchema, SignInSchema } = require("@repo/common/types")
+const { CreateRoomSchema, CreateUserSchema, SignInSchema } = require("@repo/common/types");
 const app = express();
 app.use(express.json());
+app.use(cors());
 
 //@ts-ignore
 app.post('/signup', async(req: Request, res: Response) => {
@@ -19,7 +20,7 @@ app.post('/signup', async(req: Request, res: Response) => {
             field: err.path.join('.'),
             message: err.message
         }));
-        return res.json({
+        return res.status(400).json({
             errors
         });
     }
@@ -28,7 +29,7 @@ app.post('/signup', async(req: Request, res: Response) => {
         const hashedPassword = bcrypt.hashSync(parsedData.data.password, salt);  
         const user = await prismaClient.user.create({
             data: {
-                email: parsedData.data?.username,
+                email: parsedData.data?.email,
                 password: hashedPassword,
                 name: parsedData.data.name,
                 photo: "https://psdwpigrwviemeuedtfq.supabase.co/storage/v1/object/public/images//profile-image.png"
@@ -39,8 +40,11 @@ app.post('/signup', async(req: Request, res: Response) => {
             userId: user.id
         });
     } catch (error :any) {
-        if(error.meta.target[0]=="email"){
-            return res.status(411).json("Email already exists");
+        if(error?.meta?.target && Array.isArray(error.meta.target) && error.meta.target[0] === "email"){
+            return res.status(409).json({
+                field: "email",
+                message: "Email already exists"
+            });
         }
         res.status(411).json(error);
     }
@@ -106,11 +110,13 @@ app.post('/room', middleware, async(req: Request, res: Response) => {
 
     //@ts-ignore
     const userId = req.userId;
+    const slug = parsedData.data.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
 
     try {
         const room = await prismaClient.room.create({
             data: {
-                slug: parsedData.data.name,
+                slug: slug,
+                name: parsedData.data.name,
                 adminId: userId
             }
         });
@@ -126,7 +132,6 @@ app.post('/room', middleware, async(req: Request, res: Response) => {
     }
 });
 
-//@ts-ignore
 app.get("/chats/:roomId", middleware, async(req: Request, res: Response) => {
     try {
         const roomId = Number(req.params.roomId);
@@ -150,6 +155,20 @@ app.get("/chats/:roomId", middleware, async(req: Request, res: Response) => {
             messages: []
         });
     }
-})
+});
+
+
+app.get("/room/:slug", async(req: Request, res: Response) => {
+    const slug = req.params.slug;
+    const room = await prismaClient.room.findFirst({
+        where: {
+            slug
+        }
+    });
+
+    res.json({
+        room
+    })
+});
 
 app.listen(3001);
