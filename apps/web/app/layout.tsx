@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Matemasie, Sour_Gummy } from "next/font/google";
 import "./globals.css";
+import Providers from "./Providers";
 
 const matemasie = Matemasie({
   variable: "--font-matemasie",
@@ -33,7 +34,9 @@ export default function RootLayout({
           font-sour-gummy
           antialiased`}
       >
-        {children}
+        <Providers>
+          {children}
+        </Providers>
       </body>
     </html>
   );

@@ -2,8 +2,8 @@ const { z } = require("zod");
 
 const CreateUserSchema = z.object({
     email: z.string({
-        required_error: "Username is required",
-        invalid_type_error: "Username must be a string"
+        required_error: "Email is required",
+        invalid_type_error: "Email must be a string"
     }).email({ message: "Must be a valid email address" }),
 
     password: z.string({
@@ -18,9 +18,9 @@ const CreateUserSchema = z.object({
 });
 
 const SignInSchema = z.object({
-    username: z.string({
-        required_error: "Username is required",
-        invalid_type_error: "Username must be a string"
+    email: z.string({
+        required_error: "Email is required",
+        invalid_type_error: "Email must be a string"
     }).email({ message: "Must be a valid email address" }),
 
     password: z.string({

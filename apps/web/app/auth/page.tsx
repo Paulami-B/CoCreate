@@ -1,11 +1,19 @@
 "use client"
 
 // import AuthForm from '../components/AuthForm';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import AuthForm from '../../components/AuthForm';
+import { useAppDispatch } from '@repo/common/hooks';
+import { clearError } from '../../../../packages/common/src/redux/authSlice';
 
 export default function Auth() {
     const [activeTab, setActiveTab] = useState<'signup' | 'signin'>('signup');
+    const dispatch = useAppDispatch();
+
+    useEffect(() => {
+        dispatch(clearError());
+    }, [activeTab]);
+    
     return (
         <div className="grid grid-cols-3 lg:grid-cols-5 gap-5 px-12 py-5 h-screen w-full box-border items-center overflow-hidden">
             <div className="col-span-3 w-full h-full lg:rounded-l-3xl shadow-lg dark:shadow-2xl dark:shadow-yellow-400 py-5 px-12 bg-white dark:bg-black">

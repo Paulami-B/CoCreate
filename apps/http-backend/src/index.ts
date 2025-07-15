@@ -36,7 +36,7 @@ app.post('/signup', async(req: Request, res: Response) => {
             }
         });
 
-        res.json({
+        res.status(200).json({
             userId: user.id
         });
     } catch (error :any) {
@@ -60,26 +60,28 @@ app.post('/signin', async(req: Request, res: Response) => {
             field: err.path.join('.'),
             message: err.message
         }));
-        return res.json({
+        return res.status(400).json({
             errors
         });
     }
 
     const user = await prismaClient.user.findFirst({
         where: {
-            email: parsedData.data.username,
+            email: parsedData.data.email,
         }
     })
 
     if (!user) {
         res.status(404).json({
-            message: "User ID does not exist"
+            field: "email",
+            message: "Email ID does not exist"
         })
         return;
     }
 
     if(!bcrypt.compareSync(parsedData.data.password, user.password)){
         return res.status(403).json({
+            field: "password",
             message: "Incorrect password"
         });
     }
@@ -88,7 +90,7 @@ app.post('/signin', async(req: Request, res: Response) => {
         userId: user.id
     }, JWT_SECRET);
 
-    res.json({
+    res.status(200).json({
         token
     });
 
@@ -103,7 +105,7 @@ app.post('/room', middleware, async(req: Request, res: Response) => {
             field: err.path.join('.'),
             message: err.message
         }));
-        return res.json({
+        return res.status(400).json({
             errors
         });
     }
@@ -121,7 +123,7 @@ app.post('/room', middleware, async(req: Request, res: Response) => {
             }
         });
 
-        return res.json({
+        return res.status(200).json({
             roomId: room.id
         });
 
@@ -146,12 +148,12 @@ app.get("/chats/:roomId", middleware, async(req: Request, res: Response) => {
             take: 1000
         });
 
-        res.json({
+        res.status(200).json({
             messages
         });
     } catch(e) {
         console.log(e);
-        res.json({
+        res.status(400).json({
             messages: []
         });
     }
@@ -166,9 +168,9 @@ app.get("/room/:slug", async(req: Request, res: Response) => {
         }
     });
 
-    res.json({
+    res.status(200).json({
         room
-    })
+    });
 });
 
 app.listen(3001);
