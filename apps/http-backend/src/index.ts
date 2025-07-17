@@ -168,9 +168,37 @@ app.get("/room/:slug", async(req: Request, res: Response) => {
         }
     });
 
+    const shapes = await prismaClient.shape.find({
+        where: {
+            roomId: room.id
+        }
+    });
+
     res.status(200).json({
-        room
+        room: room,
+        shapes: shapes
     });
 });
+
+app.post("/room/:slug", async(req: Request, res: Response) => {
+    const slug = req.params.slug;
+    const shapes: string[] = req.body;
+    const roomId = await prismaClient.room.findFirst({
+        where: {
+            slug
+        }, 
+        select: {
+            id: true
+        }
+    });
+    shapes.map(async(shape: string) => {
+        await prismaClient.shape.create({
+            data: {
+                roomId,
+                shape
+            }
+        })
+    });
+})
 
 app.listen(3001);
