@@ -97,7 +97,7 @@ app.post('/signin', async(req: Request, res: Response) => {
 });
 
 //@ts-ignore
-app.post('/room', middleware, async(req: Request, res: Response) => {
+app.post('/addRoom', middleware, async(req: Request, res: Response) => {
 
     const parsedData = CreateRoomSchema.safeParse(req.body);
     if(!parsedData.success){
@@ -112,10 +112,11 @@ app.post('/room', middleware, async(req: Request, res: Response) => {
 
     //@ts-ignore
     const userId = req.userId;
-    const slug = parsedData.data.name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
+    const { name, shapes } = parsedData.data;
+    const slug = name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
 
     try {
-        const room = await prismaClient.room.create({
+        await prismaClient.room.create({
             data: {
                 slug: slug,
                 name: parsedData.data.name,
@@ -123,13 +124,46 @@ app.post('/room', middleware, async(req: Request, res: Response) => {
             }
         });
 
-        return res.status(200).json({
-            roomId: room.id
+        shapes.map(async(shape: string) => {
+            await prismaClient.shape.create({
+                data: {
+                    slug,
+                    shape
+                }
+            });
         });
+
+        return res.status(200).json("Room created");
 
     } catch (error) {
         return res.status(411).json({
-            message: "Room already exists with this name"
+            field: 'name',
+            message: "Room exists. Choose a different name.",
+            error: error
+        });
+    }
+});
+
+//@ts-ignore
+app.post('/addShapes/:slug', middleware, async(req: Request, res: Response) => {
+    const slug = req.params.slug;
+
+    try {
+        const shapes = req.body.shapes;
+        shapes.map(async(shape: string) => {
+            await prismaClient.shape.create({
+                data: {
+                    slug,
+                    shape
+                }
+            });
+        });
+
+        return res.status(200).json("Room created");
+
+    } catch (error) {
+        return res.status(411).json({
+            message: "Error while saving shapes"
         });
     }
 });
@@ -160,45 +194,49 @@ app.get("/chats/:roomId", middleware, async(req: Request, res: Response) => {
 });
 
 
-app.get("/room/:slug", async(req: Request, res: Response) => {
-    const slug = req.params.slug;
-    const room = await prismaClient.room.findFirst({
-        where: {
-            slug
-        }
-    });
+app.get("/room/:slug", middleware, async(req: Request, res: Response) => {
 
-    const shapes = await prismaClient.shape.find({
+    const shapes = await prismaClient.shape.findMany({
         where: {
-            roomId: room.id
+            slug: req.params.slug
         }
     });
 
     res.status(200).json({
-        room: room,
         shapes: shapes
     });
 });
 
-app.post("/room/:slug", async(req: Request, res: Response) => {
+// app.post("/shape/:slug", async(req: Request, res: Response) => {
+//     const slug = req.params.slug;
+//     const shapes: string[] = req.body;
+//     const roomId = await prismaClient.room.findFirst({
+//         where: {
+//             slug
+//         }, 
+//         select: {
+//             id: true
+//         }
+//     });
+//     shapes.map(async(shape: string) => {
+//         await prismaClient.shape.create({
+//             data: {
+//                 roomId,
+//                 shape
+//             }
+//         })
+//     });
+// })
+
+//@ts-ignore
+app.get("/shapes/:slug", async(req: Request, res: Response) => {
     const slug = req.params.slug;
-    const shapes: string[] = req.body;
-    const roomId = await prismaClient.room.findFirst({
+    const shapes = await prismaClient.shape.find({
         where: {
             slug
-        }, 
-        select: {
-            id: true
         }
     });
-    shapes.map(async(shape: string) => {
-        await prismaClient.shape.create({
-            data: {
-                roomId,
-                shape
-            }
-        })
-    });
+    return res.status(200).json(shapes);
 })
 
 app.listen(3001);

@@ -26,13 +26,13 @@ const authSlice = createSlice({
             state.error = null;
         }, 
         signinSuccess: (state, action) => {
-            state.currentUser = action.payload,
+            state.currentUser = action.payload.token,
             state.loading = false;
             state.error = null;
         },
         signinFailure : (state, action) => {
             state.loading = false;
-            state.error = action.payload;
+            state.error = action.payload.error;
         },
         signoutSuccess: (state) => {
             state.currentUser = null;

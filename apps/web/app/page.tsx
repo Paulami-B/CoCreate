@@ -17,6 +17,9 @@ export default function Home() {
         dispatch(signoutSuccess());
         router.push("/auth");
       }
+      else{
+        router.push('/canvas/newroom');
+      }
     };
 
     checkAuth();

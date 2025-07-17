@@ -43,14 +43,14 @@ export default function AuthForm({ type } : { type: FormType }) {
                     field: "form",
                     message: "All fields are required"
                 }
-                return dispatch(signinFailure(error));
+                return dispatch(signinFailure({ error: error }));
             }
             else if(values.password !== values.confirmPassword){
                 const error = {
                     field: "confirmPassword",
                     message: "Password & Confirm Password must be same",
                 };
-                return dispatch(signinFailure(error));
+                return dispatch(signinFailure({ error: error }));
             }
         }
 
@@ -59,7 +59,7 @@ export default function AuthForm({ type } : { type: FormType }) {
                 field: "form",
                 message: "All fields are required",
             };
-            return dispatch(signinFailure(error));
+            return dispatch(signinFailure({ error: error }));
         }
 
         try {
@@ -74,8 +74,8 @@ export default function AuthForm({ type } : { type: FormType }) {
             }
             );
 
-            dispatch(signinSuccess(res.data));
-            router.push("/");
+            dispatch(signinSuccess({ token: res.data.token }));
+            router.push("/canvas/newroom");
         } catch (err) {
             if (axios.isAxiosError(err)) {
                 const val = err.response?.data?.errors?.[0];
@@ -85,14 +85,14 @@ export default function AuthForm({ type } : { type: FormType }) {
                         field: err.response?.data?.field || "form",
                         message: err.response?.data?.message || "Something went wrong",
                     };
-                dispatch(signinFailure(errorPayload));
+                dispatch(signinFailure({ error: errorPayload }));
             } 
             else {
                 const unexpectedError = {
                     field: "form",
                     message: "Unexpected error occurred",
                 };
-                dispatch(signinFailure(unexpectedError));
+                dispatch(signinFailure({ error: unexpectedError }));
                 console.error("Unexpected error:", err);
             }
         }
