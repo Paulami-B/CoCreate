@@ -18,7 +18,7 @@ export default function Home() {
         router.push("/auth");
       }
       else{
-        router.push('/canvas/newroom');
+        router.push('/home');
       }
     };
 
