@@ -36,7 +36,7 @@ const CreateRoomSchema = z.object({
     }).max(20, {
         message: "Room name can have atmost 20 characters"
     }),
-    shapes:z.array(z.string())
+    shapes:z.array(z.string()).optional()
 });
 
 module.exports = {
