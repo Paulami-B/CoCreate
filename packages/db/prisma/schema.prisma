@@ -16,6 +16,7 @@ model User {
   photo       String
   rooms       Room[]
   chats       Chat[]
+  members     RoomMembers[]
 }
 
 model Room {
@@ -23,10 +24,21 @@ model Room {
   slug        String       @unique
   name        String
   createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
   adminId     String
   admin       User         @relation(fields: [adminId], references: [id])
   chats       Chat[]
   shapes      Shape[]
+  members     RoomMembers[]
+}
+
+model RoomMembers {
+  id          Int          @id @default(autoincrement())
+  userId      String
+  roomId      Int
+  user        User         @relation(fields: [userId], references: [id])
+  room        Room         @relation(fields: [roomId], references: [id])
+  @@unique([userId, roomId])
 }
 
 model Chat {
