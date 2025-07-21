@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from 'react'
 import InputBox from './InputBox';
 import PasswordInputBox from './PasswordInputBox';
-import AuthButton from './AuthButton';
+import AuthButton from './auth/AuthButton';
 import axios from 'axios';
 import { BACKEND_URL } from '../app/config';
 import { useRouter } from 'next/navigation';
@@ -74,7 +74,7 @@ export default function AuthForm({ type } : { type: FormType }) {
             }
             );
 
-            dispatch(signinSuccess({ token: res.data.token }));
+            dispatch(signinSuccess(res.data));
             router.push("/canvas/newroom");
         } catch (err) {
             if (axios.isAxiosError(err)) {

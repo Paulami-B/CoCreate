@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { WS_URL } from "../app/config";
+import { WS_URL } from "../../app/config";
 import { useAppSelector } from "@repo/common/hooks";
 import Canvas from "./Canvas";
 
