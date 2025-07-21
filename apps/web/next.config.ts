@@ -5,7 +5,7 @@ const nextConfig: NextConfig = {
     return config
   },
   images: {
-    domains: ['img.freepik.com']
+    domains: ['psdwpigrwviemeuedtfq.supabase.co']
   }
 };
 

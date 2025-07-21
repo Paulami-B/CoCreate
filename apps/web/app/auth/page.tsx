@@ -2,7 +2,7 @@
 
 // import AuthForm from '../components/AuthForm';
 import React, { useEffect, useState } from 'react'
-import AuthForm from '../../components/AuthForm';
+import AuthForm from '../../components/auth/AuthForm';
 import { useAppDispatch } from '@repo/common/hooks';
 import { clearError } from '../../../../packages/common/src/redux/authSlice';
 

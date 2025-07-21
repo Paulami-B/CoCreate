@@ -5,8 +5,15 @@ interface AuthError{
     message: string;
 }
 
+interface User {
+    id: string,
+    name: string,
+    photo: string,
+    token: string,
+}
+
 interface AuthState {
-    currentUser: any,
+    currentUser: User | null,
     error: AuthError | null,
     loading: boolean
 }
@@ -26,7 +33,7 @@ const authSlice = createSlice({
             state.error = null;
         }, 
         signinSuccess: (state, action) => {
-            state.currentUser = action.payload.token,
+            state.currentUser = action.payload,
             state.loading = false;
             state.error = null;
         },

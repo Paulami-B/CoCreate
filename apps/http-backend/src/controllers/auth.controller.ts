@@ -36,6 +36,7 @@ export async function signup(req: Request, res: Response){
 
         res.status(200).json({
             token, 
+            id: user.id,
             name: user.name,
             photo: user.photo
         });
@@ -89,6 +90,7 @@ export async function signin(req: Request, res: Response){
 
     res.status(200).json({
         token,
+        id: user.id,
         name: user.name,
         photo: user.photo
     });

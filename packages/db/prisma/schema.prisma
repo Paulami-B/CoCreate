@@ -9,9 +9,9 @@ datasource db {
 }
 
 model User {
-  id          String      @id @default(uuid())
+  id          String              @id @default(uuid())
   name        String
-  email       String      @unique
+  email       String              @unique
   password    String
   photo       String
   rooms       Room[]
@@ -20,41 +20,41 @@ model User {
 }
 
 model Room {
-  id          Int          @id @default(autoincrement())
-  slug        String       @unique
+  id          Int                 @id @default(autoincrement())
+  slug        String              @unique
   name        String
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
   adminId     String
-  admin       User         @relation(fields: [adminId], references: [id])
+  admin       User                @relation(fields: [adminId], references: [id], onDelete: Cascade)
   chats       Chat[]
   shapes      Shape[]
   members     RoomMembers[]
 }
 
 model RoomMembers {
-  id          Int          @id @default(autoincrement())
+  id          Int                 @id @default(autoincrement())
   userId      String
   roomId      Int
-  user        User         @relation(fields: [userId], references: [id])
-  room        Room         @relation(fields: [roomId], references: [id])
+  user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
+  room        Room                @relation(fields: [roomId], references: [id], onDelete: Cascade)
   @@unique([userId, roomId])
 }
 
 model Chat {
-  id          Int         @id @default(autoincrement())
+  id          Int                 @id @default(autoincrement())
   roomId      Int         
   message     String
   userId      String
-  createdAt   DateTime    @default(now())
-  room        Room        @relation(fields: [roomId], references: [id])
-  user        User        @relation(fields: [userId], references: [id])
+  createdAt   DateTime            @default(now())
+  room        Room                @relation(fields: [roomId], references: [id], onDelete: Cascade)
+  user        User                @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 model Shape {
-  id          Int         @id @default(autoincrement())
+  id          Int                 @id @default(autoincrement())
   slug        String
   shape       String
-  createdAt   DateTime    @default(now())
-  room        Room        @relation(fields: [slug], references: [slug])
+  createdAt   DateTime            @default(now())
+  room        Room                @relation(fields: [slug], references: [slug], onDelete: Cascade)
 }

@@ -1,9 +1,10 @@
 "use client"
 
 import React, { useEffect, useRef, useState } from 'react'
-import Modal from './Modal'
-import { initDraw, saveShapes } from '../app/draw';
+import Modal from '..//Modal'
+import { initDraw, saveShapes } from '../../app/draw';
 import { useAppSelector } from '@repo/common/hooks';
+import CreateRoom from '../room/CreateRoom';
 
 export default function Canvas({
     slug,
@@ -48,11 +49,14 @@ export default function Canvas({
         }
     }, [canvasRef]);
 
+
     return (
         <div className={`relative`}>
             <canvas ref={canvasRef} width={document.documentElement.clientWidth} height={document.documentElement.clientHeight}></canvas>
             {showModal && (
-                <Modal closeModal={handleClose} />
+                <Modal closeModal={handleClose}>
+                    <CreateRoom closeModal={handleClose} />
+                </Modal>
             )}
         </div>
     )

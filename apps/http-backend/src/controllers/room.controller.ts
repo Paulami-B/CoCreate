@@ -23,32 +23,32 @@ export async function addRoom(req: Request, res: Response){
     const slug = name.replace(/[^a-zA-Z0-9]/g, "").toLowerCase();
 
     try {
-        const operations = [];
-
-        operations.push(
-            prismaClient.room.create({
+        await prismaClient.$transaction(async (tx: any) => {
+            const room = await tx.room.create({
                 data: {
-                    slug: slug,
-                    name: parsedData.data.name,
+                    slug,
+                    name,
                     adminId: userId
-                },
-            })
-        );
-
-        if(shapes){
-            shapes.forEach((shape: string) => {
-                operations.push(
-                    prismaClient.shape.create({
-                        data: {
-                            slug,
-                            shape,
-                        },
-                    })
-                );
+                }
             });
-        }
 
-        await prismaClient.$transaction(operations);
+            await tx.roomMembers.create({
+                data: {
+                    roomId: room.id,
+                    userId: userId
+                }
+            });
+
+            if (shapes && shapes.length > 0) {
+                const shapeData = shapes.map((shape: string) => ({
+                    slug,
+                    shape
+                }));
+                await tx.shape.createMany({
+                    data: shapeData
+                });
+            }
+        });
 
         return res.status(200).json("Room created");
 
@@ -72,10 +72,12 @@ export async function getAllRooms(req: Request, res: Response) {
             include: {
                 room: {
                     select: {
+                        id: true,
                         slug: true,
                         name: true,
                         admin: {
                             select: {
+                                id: true,
                                 name: true
                             },
                         },
@@ -84,6 +86,7 @@ export async function getAllRooms(req: Request, res: Response) {
                                 id: true
                             }
                         },
+                        createdAt: true,
                         updatedAt: true
                     }
                 }
@@ -91,11 +94,15 @@ export async function getAllRooms(req: Request, res: Response) {
         });
 
         const result = rooms.map((member: any) => ({
+            id: member.room.id,
             slug: member.room.slug,
             roomName: member.room.name,
+            adminId: member.room.admin.id,
             adminName: member.room.admin.name,
             membersCount: member.room.members.length,
             createdAt: formatDate(member.room.createdAt),
+            updatedAt: formatDate(member.room.updatedAt),
+            isMember: member.room.members.map((m: any) => m.id).includes(userId)
         }))
 
         return res.status(200).json(result);
@@ -106,13 +113,13 @@ export async function getAllRooms(req: Request, res: Response) {
 
 export async function getRoomsOverview(req: Request, res: Response) {
     try {
-        const rooms = await prismaClient.findMany({
+        const rooms = await prismaClient.room.findMany({
             where: {
                 slug: {
                     contains: req.params.slug
                 },
             },
-            include: {
+            select: {
                 slug: true,
                 name: true,
                 admin: {
@@ -128,6 +135,9 @@ export async function getRoomsOverview(req: Request, res: Response) {
                 createdAt: true
             }
         });
+        if(!rooms){
+            return res.status(200);
+        }
 
         const result = rooms.map((room: any) => ({
             slug: room.slug,
@@ -209,4 +219,20 @@ export async function getRoomDetails(req: Request, res: Response){
         messages: chats,
         shapes: data.room.shapes
     });
+}
+
+export async function deleteRoom(req: Request, res: Response){
+    try {
+        //@ts-ignore
+        const userId = req.userId
+        await prismaClient.room.delete({
+            where: {
+                slug: req.params.slug,
+                adminId: userId
+            }
+        });
+        return res.status(200).json("Room deleted");
+    } catch (error) {
+        return res.status(400).json(error);
+    }
 }

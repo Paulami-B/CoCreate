@@ -13,5 +13,5 @@ app.use(roomRouter);
 app.use(dataRouter);
 
 app.listen(3001, () => {
-    console.log("Listening at PORT 3000 🎧");
+    console.log("HTTP listening at PORT 3000 🎧");
 });
